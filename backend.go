@@ -7,7 +7,7 @@ type Factory func() func(in interface{}) (out interface{}, err error)
 var _ Subject = (*subject)(nil)
 
 type Observer interface {
-	Update(interface{}, error)
+	Update([]byte, error)
 }
 
 type Subject interface {
@@ -17,7 +17,7 @@ type Subject interface {
 type subject struct {
 	data      interface{}
 	observers []Observer
-	result    interface{}
+	result    []byte
 	err       error
 }
 
@@ -39,7 +39,7 @@ func (s *subject) notify() {
 	}
 }
 
-func (s *subject) updateContext(result interface{}, err error) {
+func (s *subject) updateContext(result []byte, err error) {
 	s.result = result
 	s.err = err
 	s.notify()

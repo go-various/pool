@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"github.com/hashicorp/go-hclog"
+	"runtime"
+	"sync/atomic"
 )
 
 var ErrWorkFull = errors.New("worker chan is full")
@@ -18,6 +20,7 @@ type Worker struct {
 	inputChan chan *subject //数据输入chan
 	logger    hclog.Logger
 	stopped   bool
+	deals     uint64
 }
 
 func NewWorker(name string, ctx context.Context, factory Factory, logger hclog.Logger) *Worker {
@@ -58,10 +61,14 @@ func (m *Worker) Stop() {
 }
 
 func (m *Worker) Start() {
+	runtime.LockOSThread()
+	defer runtime.UnlockOSThread()
+
 	defer func() {
 		if m.logger.IsTrace() {
 			m.logger.Trace("exited")
 		}
+		m.logger.Info("worker deals", "total", m.deals)
 	}()
 	isRunning := true
 	for isRunning || m.ChanSize() > 0 {
@@ -70,6 +77,7 @@ func (m *Worker) Start() {
 			if m.logger.IsTrace() {
 				m.logger.Trace("started")
 			}
+			atomic.AddUint64(&m.deals, 1)
 			result, err := m.factory()(s.data)
 			s.updateContext(result, err)
 
@@ -89,6 +97,7 @@ func (m *Worker) cleanup() {
 	if m.logger.IsTrace() {
 		m.logger.Trace("cleanup...")
 	}
+
 	close(m.stopChan)
 	close(m.inputChan)
 	close(m.running)

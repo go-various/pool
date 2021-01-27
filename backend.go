@@ -2,7 +2,7 @@ package pool
 
 //in 输入数据
 //out输出数据，err 错误消息
-type Factory func() func(in interface{}) (out interface{}, err error)
+type Factory func(in interface{}) (out interface{}, err error)
 
 var _ Subject = (*subject)(nil)
 

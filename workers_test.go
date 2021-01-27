@@ -5,6 +5,7 @@ import (
 	"github.com/hashicorp/go-hclog"
 	"sort"
 	"testing"
+	"time"
 )
 
 func TestWorkers_Swap(t *testing.T) {
@@ -34,4 +35,5 @@ func TestWorkers_Swap(t *testing.T) {
 	for _, worker := range workers {
 		t.Log(worker.ChanSize())
 	}
+	t.Log(time.Duration(20000000) * time.Microsecond)
 }

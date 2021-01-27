@@ -78,7 +78,7 @@ func (m *Worker) Start() {
 				m.logger.Trace("started")
 			}
 			atomic.AddUint64(&m.deals, 1)
-			result, err := m.factory()(s.data)
+			result, err := m.factory(s.data)
 			s.updateContext(result, err)
 
 			if m.logger.IsTrace() {
